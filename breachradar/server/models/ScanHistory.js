@@ -1,10 +1,24 @@
 const mongoose = require('mongoose');
 
 const scanHistorySchema = new mongoose.Schema({
-  email: { type: String, required: true },
-  scanDate: { type: Date, default: Date.now },
-  breachCount: { type: Number, default: 0 },
-  riskScore: { type: Number, default: 0 },
+  email: {
+     type: String,
+     required: true
+     },
+  scanDate: {
+     type: Date,
+      default: Date.now 
+    },
+  breachCount:
+   { 
+    type: Number,
+     default: 0
+     },
+  riskScore:
+   { 
+    type: Number, 
+    default: 0
+   },
   breaches: [{
     name: String,
     domain: String,
@@ -13,7 +27,11 @@ const scanHistorySchema = new mongoose.Schema({
     pwnCount: Number,
     logoPath: String
   }],
-  severity: { type: String, enum: ['Critical', 'High', 'Medium', 'Low', 'Safe'], default: 'Safe' }
+  severity:
+   {
+     type: String, 
+     enum: ['Critical', 'High', 'Medium', 'Low', 'Safe'],
+      default: 'Safe' }
 });
 
 scanHistorySchema.pre('save', function() {

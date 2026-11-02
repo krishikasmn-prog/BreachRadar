@@ -1,4 +1,7 @@
 const express = require('express');
+const ScanHistory = require('./models/ScanHistory');
+const AlertSubscription = require('./models/AlertSubscription');
+const { checkAndAlert } = require('./utils/alertChecker');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -8,11 +11,20 @@ const { execSync } = require('child_process');
 const cron = require('node-cron');
 const path = require('path');
 
-dotenv.config();
+const fs = require('fs');
+const envPath = path.join(__dirname, '.env');
+dotenv.config({ path: envPath });
+if (!fs.existsSync(envPath)) {
+  console.error('\n[SETUP PROBLEM] No ".env" file found in: ' + __dirname);
+  const files = fs.readdirSync(__dirname).filter(f => f.toLowerCase().startsWith('.env'));
+  console.error('Files starting with ".env" in that folder: ' + (files.length ? files.join(', ') : 'none'));
+  console.error('Fix: the file must be named exactly ".env" (not ".env.txt" or ".env.example").\n');
+} else if (!process.env.MONGODB_URI) {
+  console.error('\n[SETUP PROBLEM] .env was found but MONGODB_URI is empty. It must look like:');
+  console.error('MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/dbname   (no spaces, no quotes)\n');
+}
 
-const ScanHistory = require('./models/ScanHistory');
-const AlertSubscription = require('./models/AlertSubscription');
-const { checkAndAlert } = require('./utils/alertChecker');
+
 
 const app = express();
 app.use(express.json());
@@ -22,9 +34,8 @@ app.get("/", (req, res) => {
   res.send("Backend is live 🚀");
 });
 
-console.log("MONGO URI:", process.env.MONGODB_URI);
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI || '')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
